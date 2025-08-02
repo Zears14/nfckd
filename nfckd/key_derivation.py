@@ -1,11 +1,12 @@
+import time
+
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.hmac import HMAC
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from .exceptions import NFCkdError
-from .DerivedKey import DerivedKey
 from loguru import logger
 
-import time
+from .DerivedKey import DerivedKey
+from .exceptions import NFCkdError
 
 
 class KeyDerivation:
@@ -23,16 +24,18 @@ class KeyDerivation:
         """
         logger.debug("Deriving intermediate key")
         start = time.monotonic()
-        
+
         h = HMAC(self.hmac_key, hashes.SHA256())
         h.update(seed)
         intermediate_key = h.finalize()
-        
+
         duration = time.monotonic() - start
         logger.debug(f"Intermediate key derived in {duration:.3f}s")
         return intermediate_key
 
-    def session(self, intermediate_key: bytes, info: str = "nfc-auth-key-v1") -> DerivedKey:
+    def session(
+        self, intermediate_key: bytes, info: str = "nfc-auth-key-v1"
+    ) -> DerivedKey:
         """
         Derive a session key using HKDF-SHA256.
         """
@@ -43,7 +46,7 @@ class KeyDerivation:
                 algorithm=hashes.SHA256(),
                 length=32,
                 salt=None,
-                info=info.encode('utf-8')
+                info=info.encode("utf-8"),
             )
             key_bytes = hkdf.derive(intermediate_key)
             derived_key = DerivedKey(key_bytes)

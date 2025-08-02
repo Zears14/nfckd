@@ -1,18 +1,19 @@
-
-import os
 import getpass
 import hashlib
-import nfc
-import ndef
+import os
 import time
-
-from loguru import logger
 from pathlib import Path
-from .logger_config import configure_logger
-from .exceptions import NFCkdError
-from .utils import load_hmac_key
+
+import ndef
+import nfc
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.hmac import HMAC
+from loguru import logger
+
+from .exceptions import NFCkdError
+from .logger_config import configure_logger
+from .utils import load_hmac_key
+
 
 class TagWriter:
     """
@@ -23,12 +24,12 @@ class TagWriter:
         self,
         hmac_key_path: str = "hmac_key.pkey",
         device: str = "tty:USB0:pn532",
-        log_level: str = "INFO"
+        log_level: str = "INFO",
     ) -> None:
         configure_logger(log_level)
         self.device = device
         logger.info(f"TagWriter initializing with device '{device}'")
-        
+
         try:
             self.hmac_key = load_hmac_key(Path(hmac_key_path))
             logger.debug(f"HMAC key loaded from {hmac_key_path}")
@@ -58,29 +59,32 @@ class TagWriter:
         clf = nfc.ContactlessFrontend(self.device)
         logger.info("Waiting for NFC tag...")
         try:
+
             def on_connect(tag):
                 logger.info(f"Tag detected (UID: {tag.identifier.hex()})")
                 start = time.monotonic()
-                
+
                 # format if needed
                 if not tag.ndef:
                     if tag.format():
                         logger.info("Tag formatted to NDEF")
                     else:
                         raise NFCkdError("Cannot format tag to NDEF")
-                        
+
                 if tag.ndef.capacity < 64:
-                    raise NFCkdError(f"Tag capacity insufficient: {tag.ndef.capacity} bytes (need 64)")
+                    raise NFCkdError(
+                        f"Tag capacity insufficient: {tag.ndef.capacity} bytes (need 64)"
+                    )
 
                 # Create and write NDEF record
                 h = HMAC(self.hmac_key, hashes.SHA256())
                 h.update(seed + tag.identifier)
                 payload = h.finalize() + seed
                 record = ndef.Record("application/octet-stream", "nfckd", payload)
-                
+
                 logger.debug(f"Writing NDEF record ({len(payload)} bytes)")
                 tag.ndef.records = [record]
-                
+
                 duration = time.monotonic() - start
                 logger.info(f"Tag written successfully in {duration:.2f}s")
                 clf.close()

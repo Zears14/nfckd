@@ -1,10 +1,14 @@
 from __future__ import annotations
+
+import base64
+import hmac
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import hmac
-import base64
 from typing import Optional
+
 from loguru import logger
+
+
 @dataclass
 class DerivedKey:
     """
@@ -12,6 +16,7 @@ class DerivedKey:
 
     Provides utility methods for serialization, expiration checks, and secure wiping.
     """
+
     _key: bytes
     _derived_time: datetime = datetime.now()
 
@@ -33,7 +38,7 @@ class DerivedKey:
     @property
     def b64(self) -> str:
         """Base64-encoded representation of the key."""
-        return base64.b64encode(self._key).decode('ascii')
+        return base64.b64encode(self._key).decode("ascii")
 
     def is_expired(self, ttl: Optional[timedelta]) -> bool:
         """
@@ -64,7 +69,9 @@ class DerivedKey:
         return self.hex
 
     def __repr__(self) -> str:
-        return f"<DerivedKey hex={self.hex} derived_time={self._derived_time.isoformat()}>"
+        return (
+            f"<DerivedKey hex={self.hex} derived_time={self._derived_time.isoformat()}>"
+        )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, DerivedKey):

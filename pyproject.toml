@@ -11,8 +11,11 @@ authors = [
     { name = "Zears14"}
 ]
 license = { text = "MIT" }
-dependencies = []
-
+dependencies = [
+    "cryptography>=45.0.5",
+    "nfcpy>=1.0.4",
+    "loguru>=0.7.3"
+]
 [tool.setuptools]
 packages = ["nfckd"]
 

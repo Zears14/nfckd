@@ -1,16 +1,17 @@
-import nfc
 import time
-
 from pathlib import Path
+
+import nfc
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.hmac import HMAC
-from cryptography.exceptions import InvalidSignature
 from loguru import logger
-from .logger_config import configure_logger
-from .exceptions import NFCkdError
-from .utils import load_hmac_key
-from .key_derivation import KeyDerivation
+
 from .DerivedKey import DerivedKey
+from .exceptions import NFCkdError
+from .key_derivation import KeyDerivation
+from .logger_config import configure_logger
+from .utils import load_hmac_key
 
 
 class NFCkd:
@@ -22,11 +23,13 @@ class NFCkd:
         self,
         hmac_key_path: str = "hmac_key.pkey",
         device: str = "tty:USB0:pn532",
-        log_level: str = "INFO"
+        log_level: str = "INFO",
     ) -> None:
         configure_logger(log_level)
         self.device = device
-        logger.info(f"NFCkd initializing with device '{device}' and HMAC key path '{hmac_key_path}'")
+        logger.info(
+            f"NFCkd initializing with device '{device}' and HMAC key path '{hmac_key_path}'"
+        )
         self.hmac_key = load_hmac_key(Path(hmac_key_path))
         self.derivation = KeyDerivation(self.hmac_key)
         logger.debug("KeyDerivation instance initialized")
@@ -83,7 +86,7 @@ class NFCkd:
 
         try:
             logger.info("Waiting for NFC tag...")
-            clf.connect(rdwr={'on-connect': callback, 'beep-on-connect': False})
+            clf.connect(rdwr={"on-connect": callback, "beep-on-connect": False})
         except Exception as e:
             logger.error(f"NFC connection failed: {e}")
             raise NFCkdError(f"NFC connection failed: {e}")

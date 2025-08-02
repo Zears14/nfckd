@@ -9,7 +9,7 @@ def configure_logger(level: str = "INFO") -> None:
     """
     logger.remove()  # Remove default handler
     lvl = level.upper()
-    
+
     if lvl == "SILENT":
         # In silent mode, only log CRITICAL level messages and discard them
         logger.add(lambda msg: None, level="CRITICAL", colorize=True)
