@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     { name = "Zears14"}
 ]
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 dependencies = [
     "cryptography>=45.0.5",
     "nfcpy>=1.0.4",
