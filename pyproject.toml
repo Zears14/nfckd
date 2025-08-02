@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nfckd"
+version = "0.1.0"
+description = "A Python library for NFC tag writing and key derivation"
+readme = "README.md"
+authors = [
+    { name = "Zears14"}
+]
+license = { text = "MIT" }
+dependencies = []
+
+[tool.setuptools]
+packages = ["nfckd"]
+
