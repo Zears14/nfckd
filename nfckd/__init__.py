@@ -18,7 +18,7 @@ Example:
         >>> writer.write_tag(seed)
 
     Reading and deriving keys:
-        >>> from nfckd import NFCkd
+        >>> from nfckd.client import NFCkd
         >>> client = NFCkd()
         >>> session_key = client.authenticate()
         >>> print(session_key.hex)
