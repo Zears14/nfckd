@@ -11,7 +11,8 @@ from loguru import logger
 
 @dataclass
 class DerivedKey:
-    """A class representing a derived cryptographic key with metadata and utility methods.
+    """
+    A class representing a derived cryptographic key with metadata and utility methods.
 
     This class encapsulates a cryptographic key along with its derivation timestamp and
     provides various utility methods for key manipulation, including serialization in

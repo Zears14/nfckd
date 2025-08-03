@@ -60,7 +60,7 @@ class TagWriter:
             logger.debug(f"HMAC key loaded from {hmac_key_path}")
         except Exception as e:
             logger.error(f"Failed to load HMAC key: {e}")
-            raise NFCkdError(e)
+            raise NFCkdError(e) from e
 
     def generate_seed(self, use_hash: bool = False) -> bytes:
         """Generate or derive a 32-byte seed value.
@@ -123,7 +123,10 @@ class TagWriter:
 
                 if tag.ndef.capacity < 64:
                     raise NFCkdError(
-                        f"Tag capacity insufficient: {tag.ndef.capacity} bytes (need 64)"
+                        (
+                            f"Tag capacity insufficient: {tag.ndef.capacity} bytes "
+                            f"(need 64)"
+                        )
                     )
 
                 # Create and write NDEF record
@@ -143,7 +146,7 @@ class TagWriter:
             clf.connect(rdwr={"on-connect": on_connect, "beep-on-connect": False})
         except Exception as e:
             logger.error(f"Tag write failed: {e}")
-            raise NFCkdError(e)
+            raise NFCkdError(e) from e
         finally:
             if clf:
                 clf.close()

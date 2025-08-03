@@ -93,4 +93,4 @@ class KeyDerivation:
             return derived_key
         except Exception as e:
             logger.error(f"HKDF derivation failed: {e}")
-            raise NFCkdError(f"HKDF derivation failed: {e}")
+            raise NFCkdError(f"HKDF derivation failed: {e}") from e

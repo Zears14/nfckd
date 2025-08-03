@@ -35,7 +35,8 @@ class NFCkd:
         """Initialize NFCkd with the specified device and HMAC key.
 
         Args:
-            hmac_key_path (str, optional): Path to the HMAC key file. Defaults to "hmac_key.pkey".
+            hmac_key_path (str, optional): Path to the HMAC key file.
+                Defaults to "hmac_key.pkey".
             device (str, optional): NFC device identifier. Defaults to "tty:USB0:pn532".
             log_level (str, optional): Logging level to use. Defaults to "INFO".
 
@@ -45,7 +46,8 @@ class NFCkd:
         configure_logger(log_level)
         self.device = device
         logger.info(
-            f"NFCkd initializing with device '{device}' and HMAC key path '{hmac_key_path}'"
+            f"NFCkd initializing with device '{device}' "
+            f"and HMAC key path '{hmac_key_path}'"
         )
         self.hmac_key = load_hmac_key(Path(hmac_key_path))
         self.derivation = KeyDerivation(self.hmac_key)
@@ -70,7 +72,7 @@ class NFCkd:
             logger.debug(f"Connecting to NFC device: {self.device}")
         except Exception as e:
             logger.critical(f"Failed to connect to NFC device: {e}")
-            raise NFCkdError(f"Failed to connect to NFC device: {e}")
+            raise NFCkdError(f"Failed to connect to NFC device: {e}") from e
         seed = None
 
         def callback(tag):
@@ -100,21 +102,21 @@ class NFCkd:
                 clf.close()
                 return False  # tells connect() to return immediately
 
-            except InvalidSignature:
+            except InvalidSignature as e:
                 logger.error("HMAC verification failed")
                 clf.close()
-                raise NFCkdError("HMAC verification failed.")
+                raise NFCkdError("HMAC verification failed.") from e
             except Exception as e:
                 logger.error(f"Error while processing tag: {e}")
                 clf.close()
-                raise NFCkdError(f"Read error: {e}")
+                raise NFCkdError(f"Read error: {e}") from e
 
         try:
             logger.info("Waiting for NFC tag...")
             clf.connect(rdwr={"on-connect": callback, "beep-on-connect": False})
         except Exception as e:
             logger.error(f"NFC connection failed: {e}")
-            raise NFCkdError(f"NFC connection failed: {e}")
+            raise NFCkdError(f"NFC connection failed: {e}") from e
 
         # clf already closed in callback
         if seed is None:
