@@ -10,6 +10,9 @@ readme = "README.md"
 authors = [
     { name = "Zears14"}
 ]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+]
 license = { file = "LICENSE" }
 dependencies = [
     "cryptography>=45.0.5",

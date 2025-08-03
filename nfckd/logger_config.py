@@ -2,10 +2,20 @@ from loguru import logger
 
 
 def configure_logger(level: str = "INFO") -> None:
-    """
-    Configure Loguru logger with the specified level.
+    """Configure the Loguru logger with custom settings and the specified level.
 
-    :param level: Log level (e.g., "DEBUG", "INFO", "WARNING", "ERROR", "SILENT").
+    This function sets up the Loguru logger with color output and custom formatting.
+    In normal mode, messages are printed to stdout. In silent mode, only CRITICAL
+    level messages are captured but discarded.
+
+    Args:
+        level (str, optional): The minimum log level to capture. Accepts standard
+            log levels: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", or
+            "SILENT" for no output. Defaults to "INFO".
+
+    Example:
+        >>> configure_logger("DEBUG")  # Enable all logging
+        >>> configure_logger("SILENT") # Disable all output
     """
     logger.remove()  # Remove default handler
     lvl = level.upper()

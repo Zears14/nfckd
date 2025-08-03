@@ -15,8 +15,15 @@ from .utils import load_hmac_key
 
 
 class NFCkd:
-    """
-    NFCkd handles NFC tag authentication and session key derivation.
+    """NFCkd handles NFC tag authentication and session key derivation.
+
+    This class provides functionality to authenticate NFC tags and derive session keys
+    using HMAC-SHA256 for tag verification and HKDF-SHA256 for key derivation.
+
+    Attributes:
+        device (str): The NFC device path to use (e.g., 'tty:USB0:pn532')
+        hmac_key (bytes): The 32-byte HMAC key loaded from file
+        derivation (KeyDerivation): Instance for handling key derivation operations
     """
 
     def __init__(
@@ -25,6 +32,16 @@ class NFCkd:
         device: str = "tty:USB0:pn532",
         log_level: str = "INFO",
     ) -> None:
+        """Initialize NFCkd with the specified device and HMAC key.
+
+        Args:
+            hmac_key_path (str, optional): Path to the HMAC key file. Defaults to "hmac_key.pkey".
+            device (str, optional): NFC device identifier. Defaults to "tty:USB0:pn532".
+            log_level (str, optional): Logging level to use. Defaults to "INFO".
+
+        Raises:
+            NFCkdError: If the HMAC key file cannot be loaded or is invalid.
+        """
         configure_logger(log_level)
         self.device = device
         logger.info(
@@ -35,10 +52,18 @@ class NFCkd:
         logger.debug("KeyDerivation instance initialized")
 
     def _read_verified_seed(self) -> bytes:
-        """
-        Read and verify seed from NFC tag.
-        :return: Seed bytes.
-        :raises NFCkdError: On any read or verification error.
+        """Read and verify seed from NFC tag.
+
+        This method reads an NDEF record from an NFC tag, extracts the seed and MAC,
+        and verifies the MAC using the stored HMAC key. The MAC is computed over
+        the concatenation of the seed and tag UID to bind the seed to this specific tag.
+
+        Returns:
+            bytes: The verified 32-byte seed from the tag.
+
+        Raises:
+            NFCkdError: If the tag cannot be read, is missing NDEF records,
+                has invalid format, or fails MAC verification.
         """
         try:
             clf = nfc.ContactlessFrontend(self.device)
@@ -100,9 +125,18 @@ class NFCkd:
         return seed
 
     def authenticate(self) -> DerivedKey:
-        """
-        Perform authentication and derive session key.
-        :return: DerivedKey
+        """Perform NFC tag authentication and derive a session key.
+
+        This method performs the complete authentication flow:
+        1. Reads and verifies the seed from an NFC tag
+        2. Derives an intermediate key using HMAC-SHA256
+        3. Derives a final session key using HKDF-SHA256
+
+        Returns:
+            DerivedKey: A newly derived session key with timestamp.
+
+        Raises:
+            NFCkdError: If tag authentication or key derivation fails.
         """
         logger.info("Starting authentication process...")
         seed = self._read_verified_seed()

@@ -16,8 +16,20 @@ from .utils import load_hmac_key
 
 
 class TagWriter:
-    """
-    TagWriter formats an NFC NTAG for NDEF and writes an authenticated seed + HMAC record.
+    """A class for formatting and writing authenticated data to NFC tags.
+
+    This class handles NFC tag operations including:
+    - Formatting tags to NDEF format
+    - Generating or deriving seed values
+    - Creating authenticated records using HMAC
+    - Writing combined seed and HMAC data to tags
+
+    The written data format is: HMAC(seed + UID) || seed
+    This binds the seed to the specific tag through its UID.
+
+    Attributes:
+        device (str): The NFC device path (e.g., 'tty:USB0:pn532')
+        hmac_key (bytes): The 32-byte HMAC key for authentication
     """
 
     def __init__(
@@ -26,6 +38,19 @@ class TagWriter:
         device: str = "tty:USB0:pn532",
         log_level: str = "INFO",
     ) -> None:
+        """Initialize the TagWriter with an NFC device and HMAC key.
+
+        Args:
+            hmac_key_path (str, optional): Path to the 32-byte HMAC key file.
+                Defaults to "hmac_key.pkey".
+            device (str, optional): NFC device identifier path.
+                Defaults to "tty:USB0:pn532".
+            log_level (str, optional): Logging verbosity level.
+                Defaults to "INFO".
+
+        Raises:
+            NFCkdError: If the HMAC key file cannot be loaded or is invalid.
+        """
         configure_logger(log_level)
         self.device = device
         logger.info(f"TagWriter initializing with device '{device}'")
@@ -38,9 +63,18 @@ class TagWriter:
             raise NFCkdError(e)
 
     def generate_seed(self, use_hash: bool = False) -> bytes:
-        """
-        Generate or derive a 32-byte seed.
-        If use_hash=True, prompts for password and hashes it.
+        """Generate or derive a 32-byte seed value.
+
+        This method either generates a cryptographically secure random seed
+        or derives one from a user-provided password using SHA-256.
+
+        Args:
+            use_hash (bool, optional): If True, prompt for a password and derive
+                the seed using SHA-256. If False, generate a random seed using
+                os.urandom. Defaults to False.
+
+        Returns:
+            bytes: A 32-byte seed value.
         """
         if use_hash:
             pwd = getpass.getpass("Enter password to derive seed: ").encode("utf-8")
@@ -52,9 +86,25 @@ class TagWriter:
             return os.urandom(32)
 
     def write_tag(self, seed: bytes) -> None:
-        """
-        Connect to the NFC device, format (if needed), and write NDEF record.
-        Data = HMAC(seed + UID) + seed
+        """Write an authenticated seed to an NFC tag.
+
+        This method performs the following operations:
+        1. Connects to an NFC tag
+        2. Formats the tag for NDEF if needed
+        3. Verifies tag capacity (needs >= 64 bytes)
+        4. Calculates HMAC over seed + tag UID
+        5. Writes HMAC + seed as an NDEF record
+
+        The written NDEF record contains:
+        - First 32 bytes: HMAC-SHA256(seed + tag.identifier)
+        - Last 32 bytes: seed
+
+        Args:
+            seed (bytes): The 32-byte seed to write to the tag.
+
+        Raises:
+            NFCkdError: If tag connection fails, formatting fails,
+                capacity is insufficient, or writing fails.
         """
         clf = nfc.ContactlessFrontend(self.device)
         logger.info("Waiting for NFC tag...")
