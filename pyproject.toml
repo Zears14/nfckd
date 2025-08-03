@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nfckd"
-version = "0.0.0.dev1"
+dynamic = ["version"]
 description = "A Python library for NFC tag writing and key derivation"
 readme = "README.md"
 authors = [
@@ -51,4 +51,6 @@ format = [
     "ruff format . --check",
     "ruff check . --fix"
 ]
+[tool.hatch.version]
+path = "nfckd/__init__.py"
 
