@@ -3,6 +3,7 @@ import hashlib
 import os
 import time
 from pathlib import Path
+from typing import Final, Any
 
 import ndef
 import nfc
@@ -32,11 +33,17 @@ class TagWriter:
         hmac_key (bytes): The 32-byte HMAC key for authentication
     """
 
+    device: Final[str]
+    hmac_key: Final[bytes]
+    tag_capacity_min: Final[int]
+    _clf: nfc.ContactlessFrontend
+
     def __init__(
         self,
         hmac_key_path: str = "hmac_key.pkey",
         device: str = "tty:USB0:pn532",
         log_level: str = "INFO",
+        tag_capacity_min: int = 64,
     ) -> None:
         """Initialize the TagWriter with an NFC device and HMAC key.
 
@@ -47,12 +54,15 @@ class TagWriter:
                 Defaults to "tty:USB0:pn532".
             log_level (str, optional): Logging verbosity level.
                 Defaults to "INFO".
+            tag_capacity_min (int, optional): Minimum required tag capacity in bytes.
+                Defaults to 64.
 
         Raises:
             NFCkdError: If the HMAC key file cannot be loaded or is invalid.
         """
         configure_logger(log_level)
         self.device = device
+        self.tag_capacity_min = tag_capacity_min
         logger.info(f"TagWriter initializing with device '{device}'")
 
         try:
@@ -106,12 +116,12 @@ class TagWriter:
             NFCkdError: If tag connection fails, formatting fails,
                 capacity is insufficient, or writing fails.
         """
-        clf = nfc.ContactlessFrontend(self.device)
+        self._clf = nfc.ContactlessFrontend(self.device)
         logger.info("Waiting for NFC tag...")
         try:
 
-            def on_connect(tag):
-                logger.info(f"Tag detected (UID: {tag.identifier.hex()})")
+            def on_connect(tag: Any) -> bool:
+                logger.info(f"Tag detected (UID: {tag.identifier.hex()}")
                 start = time.monotonic()
 
                 # format if needed
@@ -121,11 +131,11 @@ class TagWriter:
                     else:
                         raise NFCkdError("Cannot format tag to NDEF")
 
-                if tag.ndef.capacity < 64:
+                if tag.ndef.capacity < self.tag_capacity_min:
                     raise NFCkdError(
                         (
                             f"Tag capacity insufficient: {tag.ndef.capacity} bytes "
-                            f"(need 64)"
+                            f"(need {self.tag_capacity_min})"
                         )
                     )
 
@@ -140,14 +150,14 @@ class TagWriter:
 
                 duration = time.monotonic() - start
                 logger.info(f"Tag written successfully in {duration:.2f}s")
-                clf.close()
+                self._clf.close()
                 return False
 
-            clf.connect(rdwr={"on-connect": on_connect, "beep-on-connect": False})
+            self._clf.connect(rdwr={"on-connect": on_connect, "beep-on-connect": False})
         except Exception as e:
             logger.error(f"Tag write failed: {e}")
             raise NFCkdError(e) from e
         finally:
-            if clf:
-                clf.close()
+            if self._clf:
+                self._clf.close()
                 logger.debug("NFC device closed")

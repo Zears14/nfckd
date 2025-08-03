@@ -1,4 +1,5 @@
 import time
+from typing import Final
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.hmac import HMAC
@@ -19,6 +20,8 @@ class KeyDerivation:
     Attributes:
         hmac_key (bytes): A 32-byte key used for HMAC operations.
     """
+
+    hmac_key: Final[bytes]
 
     def __init__(self, hmac_key: bytes) -> None:
         """Initialize the KeyDerivation instance.
@@ -56,7 +59,7 @@ class KeyDerivation:
         return intermediate_key
 
     def session(
-        self, intermediate_key: bytes, info: str = "nfc-auth-key-v1"
+        self, intermediate_key: bytes, info: str = "nfc-auth-key-v1", length: int = 32
     ) -> DerivedKey:
         """Derive a session key using HKDF-SHA256.
 
@@ -70,6 +73,7 @@ class KeyDerivation:
                 derivation step.
             info (str, optional): Context and application specific information
                 string used in the HKDF calculation. Defaults to "nfc-auth-key-v1".
+            length (int, optional): Length of the derived key in bytes. Defaults to 32.
 
         Returns:
             DerivedKey: A newly derived session key wrapped in a DerivedKey instance.
@@ -82,7 +86,7 @@ class KeyDerivation:
         try:
             hkdf = HKDF(
                 algorithm=hashes.SHA256(),
-                length=32,
+                length=length,
                 salt=None,
                 info=info.encode("utf-8"),
             )

@@ -4,7 +4,7 @@ import base64
 import hmac
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Final, Optional
 
 from loguru import logger
 
@@ -24,7 +24,7 @@ class DerivedKey:
     """
 
     _key: bytes
-    _derived_time: datetime = datetime.now()
+    _derived_time: Final[datetime] = datetime.now()
 
     @property
     def key(self) -> bytes:

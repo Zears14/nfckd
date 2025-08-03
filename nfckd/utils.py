@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Final
 
 from loguru import logger
 
@@ -26,7 +27,7 @@ def load_hmac_key(path: Path) -> bytes:
         logger.critical(f"HMAC key file not found: {path}")
         raise NFCkdError(f"HMAC key file not found: {path}")
 
-    data = path.read_bytes()
+    data: Final[bytes] = path.read_bytes()
     if len(data) != 32:
         logger.critical(f"Invalid HMAC key length: {len(data)} bytes (expected 32)")
         raise NFCkdError("HMAC key must be exactly 32 bytes")

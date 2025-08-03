@@ -1,3 +1,4 @@
+from typing import Final
 from loguru import logger
 
 
@@ -18,7 +19,7 @@ def configure_logger(level: str = "INFO") -> None:
         >>> configure_logger("SILENT") # Disable all output
     """
     logger.remove()  # Remove default handler
-    lvl = level.upper()
+    lvl: Final[str] = level.upper()
 
     if lvl == "SILENT":
         # In silent mode, only log CRITICAL level messages and discard them

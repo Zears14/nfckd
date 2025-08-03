@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+from typing import Final, Optional
 
 import nfc
 from cryptography.exceptions import InvalidSignature
@@ -25,6 +26,10 @@ class NFCkd:
         hmac_key (bytes): The 32-byte HMAC key loaded from file
         derivation (KeyDerivation): Instance for handling key derivation operations
     """
+
+    device: Final[str]
+    hmac_key: Final[bytes]
+    derivation: Final[KeyDerivation]
 
     def __init__(
         self,
@@ -73,9 +78,9 @@ class NFCkd:
         except Exception as e:
             logger.critical(f"Failed to connect to NFC device: {e}")
             raise NFCkdError(f"Failed to connect to NFC device: {e}") from e
-        seed = None
+        seed: Optional[bytes] = None
 
-        def callback(tag):
+        def callback(tag: nfc.tag.Tag) -> bool:
             nonlocal seed
             try:
                 logger.info(f"Tag detected: {tag}")
@@ -113,7 +118,7 @@ class NFCkd:
 
         try:
             logger.info("Waiting for NFC tag...")
-            clf.connect(rdwr={"on-connect": callback, "beep-on-connect": False})
+            clf.connect(rdwr={"on-connect": callback, "beep-on-connect": False})  # type: ignore
         except Exception as e:
             logger.error(f"NFC connection failed: {e}")
             raise NFCkdError(f"NFC connection failed: {e}") from e
