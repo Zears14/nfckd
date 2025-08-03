@@ -48,7 +48,7 @@ pip install nfckd
 ### 1. Writing an NFC Tag
 
 ```python
-from nfckd import TagWriter
+from nfckd.tag_writer import TagWriter
 
 # Initialize with your HMAC key file
 writer = TagWriter(
@@ -69,7 +69,7 @@ writer.write_tag(seed)
 ### 2. Reading and Deriving Keys
 
 ```python
-from nfckd import NFCkd
+from nfckd.client import NFCkd
 from datetime import timedelta
 
 # Initialize the client
@@ -138,7 +138,7 @@ Available levels: DEBUG, INFO, WARNING, ERROR, CRITICAL, SILENT
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](https://github.com/Zears14/nfckd/blob/main/LICENSE) file for details.
 
 ## Author
 
