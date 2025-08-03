@@ -20,6 +20,10 @@ dependencies = [
     "loguru>=0.7.3"
 ]
 
+[project.urls]
+Repository = "https://github.com/Zears14/nfckd"
+Issues = "https://github.com/Zears14/nfckd/issues"
+
 [tool.ruff]
 line-length = 88
 target-version = "py310"
