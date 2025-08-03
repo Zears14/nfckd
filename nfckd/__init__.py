@@ -24,4 +24,4 @@ Example:
         >>> print(session_key.hex)
 """
 
-__version__ = "v0.0.0.dev3"
+__version__ = "v0.0.0.dev4"
