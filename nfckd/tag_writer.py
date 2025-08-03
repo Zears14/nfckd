@@ -30,6 +30,8 @@ class TagWriter:
 
     Attributes:
         device (str): The NFC device path (e.g., 'tty:USB0:pn532')
+            See 'https://nfcpy.readthedocs.io/en/latest/topics/get-started.html#open-a-local-device'
+            for more details.
         hmac_key (bytes): The 32-byte HMAC key for authentication
     """
 
