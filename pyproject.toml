@@ -1,17 +1,17 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "nfckd"
-version = "0.1.0"
+version = "0.0.0.dev1"
 description = "A Python library for NFC tag writing and key derivation"
 readme = "README.md"
 authors = [
-    { name = "Zears14"}
+    { name = "Zears14" }
 ]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+    "Development Status :: 3 - Alpha",
 ]
 license = { file = "LICENSE" }
 dependencies = [
@@ -19,6 +19,6 @@ dependencies = [
     "nfcpy>=1.0.4",
     "loguru>=0.7.3"
 ]
-[tool.setuptools]
-packages = ["nfckd"]
 
+[tool.hatch.build]
+packages = ["nfckd"]
